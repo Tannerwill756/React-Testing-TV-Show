@@ -1,5 +1,5 @@
 import React from "react";
-import { render, waitFor, queryAllByTestId } from "@testing-library/react";
+import { render, act, waitForElementToBeRemoved } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import App from "./App";
@@ -31,14 +31,28 @@ const episodesData = [
   },
 ];
 
-test("App is rendering", () => {
-  mockFetchShow.mockResolvedValueOnce(episodesData);
+// test("App is rendering", () => {
+//   mockFetchShow.mockResolvedValueOnce(episodesData);
 
-  const { getByText, queryAllByTestId, debug } = render(<App />);
-  debug();
-  // const select = getByText(/select a season/i);
-  // // console.log(select);
-  // userEvent.
+//   const { getByText, queryAllByTestId, debug } = render(<App />);
+//   debug();
+//   const select = getByText(/select a season/i);
+//   // console.log(select);
 
-  // await waitFor(() => expect(queryAllByTestId(/episodes/i)).toHaveLength(1));
+//   await waitFor(() => {expect(queryAllByTestId(/episodes/i)).toBeVisible();
+//   fireEvent.click(getByText(/select a season/i))
+//   });
+
+// });
+test("renders once loaded", async () => {
+  act(() => {
+    mockFetchShow.mockResolvedValueOnce(episodesData);
+
+    const { getByPlaceholderText, queryByText } = render(<App />);
+    waitForElementToBeRemoved(queryByText(/Fetching data.../i)).then(() => {
+      const selection = getByPlaceholderText("Select an option");
+      selection.value = "Season 2";
+      expect(selection).toHaveValue("Season 2");
+    });
+  });
 });
